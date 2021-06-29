@@ -1,0 +1,18 @@
+{
+  "name": "nissan_data",
+  "version": "1.0.0",
+  "description": "",
+  "main": "filter.js",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "dotenv": "^10.0.0",
+    "exceljs": "^4.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
