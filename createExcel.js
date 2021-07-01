@@ -1,5 +1,7 @@
 const ExcelJS = require("exceljs");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
+
 require('dotenv').config();
 
 (async function generateEmailData() {
@@ -24,7 +26,8 @@ require('dotenv').config();
     axios.defaults.baseURL =
         "https://api.nmef.xyz/api/content/nissanguidefordrivers";
     axios.defaults.headers.common["Authorization"] = "Bearer " + AUTH_TOKEN;
-
+        
+    
     let data
 
     try {
@@ -37,22 +40,22 @@ require('dotenv').config();
             }
         })
         data = unpublishedData.data.items;
-    } catch(err) {
+    } catch (err) {
         console.log(err);
     }
 
     const getVehicleData = (id) => {
         return axios.get(`/vehicle/${id}`);
     };
-    
+
     const getItemsData = (ids) => {
         let proms = ids.map((id) => axios.get(`/accessories/${id}`));
         return proms;
     };
-    
+
     const formatItems = async (items) =>
         items.map((item) => item.data.data.Name.en);
-    
+
     const getFormattedData = async () => {
         let _data = await data.map(async (item) => {
             let extras = await Promise.all([
@@ -70,14 +73,14 @@ require('dotenv').config();
         });
         return await Promise.all(_data);
     };
-    
+
     getFormattedData().then((formattedData) => {
         const workbook = new ExcelJS.Workbook();
-    
+
         workbook.creator = "Abdullah Al Jubaer";
-    
+
         workbook.calcProperties.fullCalcOnLoad = true;
-    
+
         workbook.views = [
             {
                 x: 0,
@@ -89,26 +92,59 @@ require('dotenv').config();
                 visibility: "visible",
             },
         ];
-    
-        const sheet = workbook.addWorksheet("Customer Data");
-        let start = 1;
-    
-        formattedData.forEach((item, index) => {
-            sheet.addRows([
-                [index + 1, "Name", item.name],
-                [index + 1, "Location", item.location],
-                [index + 1, "Email", item.email],
-                [index + 1, "Vehicle", item.vehicle],
-                [index + 1, "Items", ...item.items],
-            ]);
-            sheet.mergeCells(`A${start}:A${start + 4}`);
-            start = start + 5;
-        });
-    
-        workbook.xlsx.writeFile("OrderData.xlsx").then(() => {
-            console.log("File Created");
-        });
+
+    const sheet = workbook.addWorksheet("Customer Data");
+    let start = 1;
+
+    formattedData.forEach((item, index) => {
+        sheet.addRows([
+            [index + 1, "Name", item.name],
+            [index + 1, "Location", item.location],
+            [index + 1, "Email", item.email],
+            [index + 1, "Vehicle", item.vehicle],
+            [index + 1, "Items", ...item.items],
+        ]);
+        sheet.mergeCells(`A${start}:A${start + 4}`);
+        start = start + 5;
     });
-})();
+
+    workbook.xlsx.writeFile("OrderData.xlsx").then(() => {
+        console.log("File Created");
+    });
+
+        
+    //mailId="lucas@maruboshi.nl"
+        
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'leocollab01@gmail.com',
+            pass: 'leocollab8!!'
+        },
+        /* tls: 
+            { rejectUnauthorized: false } */
+    });
+    var mailOptions = {
+        from: '"Test" <leocollab01@gmail.com>',
+        to: 'sadman.sakib0008@gmail.com',
+        subject: 'Sending Email Test',
+        text: 'Hello!',
+        html: '<b>Hello</b>',
+        attachments: [{
+            filename: "OrderData.xlsx",
+            path: "D:/Work/nissan-email-service-master/OrderData.xlsx"
+        }]
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            return console.log(error);
+        }
+        else {
+            return console.log('Email sent: ' + info.response);
+        }
+    });
+
+});
+}) ();
 
 
