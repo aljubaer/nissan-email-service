@@ -113,7 +113,7 @@ require('dotenv').config();
     });
 
         
-    //mailId="lucas@maruboshi.nl"
+    // Receiver Email= "lucas@maruboshi.nl"
         
     var transporter = nodemailer.createTransport({
         service: 'gmail',
