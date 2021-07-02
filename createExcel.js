@@ -2,7 +2,8 @@ const ExcelJS = require("exceljs");
 const axios = require("axios");
 require('dotenv').config();
 
-(async function generateEmailData() {
+exports.generateEmailData = async function () {
+
     const params = new URLSearchParams();
     params.set("grant_type", "client_credentials");
     params.set("client_id", process.env.client_id);
@@ -109,6 +110,4 @@ require('dotenv').config();
             console.log("File Created");
         });
     });
-})();
-
-
+};
