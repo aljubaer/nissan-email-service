@@ -1,6 +1,8 @@
 const ExcelJS = require("exceljs");
 const axios = require("axios");
-require("dotenv").config();
+if (process.env.NODE_ENV === "development") {
+    require("dotenv").config();
+}
 
 exports.generateEmailData = async function () {
     let data;
