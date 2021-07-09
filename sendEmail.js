@@ -12,8 +12,8 @@ exports.sendEmail = function (cb) {
 	const mailOptions = {
 		from: '"Sales" <leocollab01@gmail.com>',
 		// to: "lucas@maruboshi.nl",
-		to: 'moshiuzzaman@brainstation23.com, shozonyrose@gmail.com',
-		// to: 'shozonyrose@gmail.com',
+		// to: 'moshiuzzaman@brainstation23.com, shozonyrose@gmail.com',
+		to: 'shozonyrose@gmail.com',
 		subject: 'New Order!!!',
 		text: 'There are some new orders from website.',
 		attachments: [
