@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
 	res.sendStatus(200);
 });
 
-app.post('/sendEmail', async (req, res) => {
+app.get('/sendEmail', async (req, res) => {
 	const unpublishedData = await emailData.generateEmailData();
 	emailSender.sendEmail(async (error, response) => {
 		if (error) {
