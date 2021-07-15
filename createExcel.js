@@ -72,6 +72,9 @@ exports.generateEmailData = async function () {
         return await Promise.all(_data);
     };
 
+    let receivers = await axios.get('/accessories-location-email');
+    receivers = receivers.data.items.map(receiver => receiver.data.Email.iv);
+
     getFormattedData().then((formattedData) => {
         const workbook = new ExcelJS.Workbook();
 
@@ -110,7 +113,7 @@ exports.generateEmailData = async function () {
             console.log("File Created");
         });
     });
-    return data;
+    return { data, receivers};
 };
 
 exports.updateData = async (data) => {

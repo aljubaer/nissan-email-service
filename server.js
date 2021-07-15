@@ -11,8 +11,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/sendEmail', async (req, res) => {
-	const unpublishedData = await emailData.generateEmailData();
-	emailSender.sendEmail(async (error, response) => {
+	const { data: unpublishedData, receivers } = await emailData.generateEmailData();
+	emailSender.sendEmail(receivers, async (error, response) => {
 		if (error) {
 			res.status(500).json({ ...error });
 		} else {

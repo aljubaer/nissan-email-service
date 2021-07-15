@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-exports.sendEmail = function (cb) {
+exports.sendEmail = function (receivers, cb) {
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -11,7 +11,7 @@ exports.sendEmail = function (cb) {
 	});
 	const mailOptions = {
 		from: '"Sales" <leocollab01@gmail.com>',
-		to: 'lucas@maruboshi.nl',
+		to: receivers.join(),
 		subject: "NISSAN Driver's Guide NMEF - New Accessories Order!!!",
 		text: 'There are some new orders from website.',
 		attachments: [
