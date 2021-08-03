@@ -11,7 +11,7 @@ exports.sendEmail = function (receivers, cb) {
 	});
 	const mailOptions = {
 		from: '"Sales" <leocollab01@gmail.com>',
-		to: receivers.join(),
+		to: 'jubaer.bs23@gmail.com',
 		subject: "NISSAN Driver's Guide NMEF - New Accessories Order!!!",
 		text: 'There are some new orders from website.',
 		attachments: [

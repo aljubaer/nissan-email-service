@@ -31,18 +31,21 @@ exports.generateEmailData = async function () {
     try {
         const unpublishedData = await axios.get("/placed-order", {
             headers: {
-                "X-Unpublished": "1",
+                // "X-Unpublished": "1",
             },
             params: {
-                $filter: "data/IsEmailSent/iv eq false",
+                // $filter: "data/IsEmailSent/iv eq false",
             },
         });
         data = unpublishedData.data.items;
+        console.log(data.length);
     } catch (err) {
-        console.log(err);
+        console.log("Error to get the place order data");
+        data = [];
     }
 
     const getVehicleData = (id) => {
+        console.log(id);
         return axios.get(`/vehicle/${id}`);
     };
 
@@ -51,29 +54,59 @@ exports.generateEmailData = async function () {
         return proms;
     };
 
-    const formatItems = async (items) =>
-        items.map((item) => item.data.data.Name.en);
+    const formatVehicle = async (item) => {
+        if (item) return item.data.data.name.iv;
+        return "No vehicle";
+    };
+
+    const formatItems = async (items) => items.map((item) => item.data.data.Name.en);
 
     const getFormattedData = async () => {
         let _data = await data.map(async (item) => {
-            let extras = await Promise.all([
-                getVehicleData(item.data.Vehicle.iv),
-                getItemsData(item.data.Items.iv),
-            ]);
-            return {
-                name: item.data.Name.iv,
-                location: item.data.LocationName.iv,
-                email: item.data.ContactEmail.iv,
-                phone: item.data.ContactNumber.iv,
-                vehicle: extras[0].data.data.name.iv,
-                items: await formatItems(await Promise.all(extras[1])),
-            };
+            if (item) {
+                let vehicleDetails, accessoriesDetails, formattedAccessories;
+                try {
+                    vehicleDetails = await getVehicleData(item.data.Vehicle.iv);
+                } catch (error) {
+                    console.log("Error on getting vehicle data");
+                }
+                try {
+                    accessoriesDetails = await getItemsData(item.data.Items.iv);
+                } catch (error) {
+                    console.log("Error on getting accessories data");
+                }
+                try {
+                    formattedAccessories = await formatItems(
+                        await Promise.all(accessoriesDetails)
+                    )
+                } catch (error) {
+                    console.log('Error on formatting accessories');
+                    formattedAccessories = [];
+                }
+                return {
+                    name: item.data.Name.iv,
+                    location: item.data.LocationName.iv,
+                    email: item.data.ContactEmail.iv,
+                    phone: item.data.ContactNumber.iv,
+                    vehicle: formatVehicle(vehicleDetails),
+                    items: formattedAccessories,
+                };
+            } else {
+                return {
+                    name: '',
+                    location: '',
+                    email: '',
+                    phone: '',
+                    vehicle: '',
+                    items: [],
+                };
+            }
         });
         return await Promise.all(_data);
     };
 
-    let receivers = await axios.get('/accessories-location-email');
-    receivers = receivers.data.items.map(receiver => receiver.data.Email.iv);
+    let receivers = await axios.get("/accessories-location-email");
+    receivers = receivers.data.items.map((receiver) => receiver.data.Email.iv);
 
     getFormattedData().then((formattedData) => {
         const workbook = new ExcelJS.Workbook();
@@ -113,7 +146,7 @@ exports.generateEmailData = async function () {
             console.log("File Created");
         });
     });
-    return { data, receivers};
+    return { data, receivers };
 };
 
 exports.updateData = async (data) => {
@@ -147,7 +180,7 @@ exports.updateData = async (data) => {
             );
             return { status: "success", updatedData };
         } catch (error) {
-            console.log('error');
+            console.log("error");
             return { status: "failed", error };
         }
     });

@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const emailData = require('./createExcel');
+const additionalData = require('./getAdditionalsData');
 const emailSender = require('./sendEmail');
 
 const PORT = process.env.PORT || 3000;
@@ -11,13 +11,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/sendEmail', async (req, res) => {
-	const { data: unpublishedData, receivers } = await emailData.generateEmailData();
-	emailSender.sendEmail(receivers, async (error, response) => {
+	let data, receivers;
+	try {
+		[ data, receivers ] = await additionalData.generateEmailData();
+	} catch (error) {
+		res.status(500).json({ error: "Failed collect data" });
+		return;
+	}
+	console.log(receivers);
+	emailSender.sendEmail(receivers, (error, response) => {
 		if (error) {
-			res.status(500).json({ ...error });
+			res.status(500).json({ error: "Failed to send email" });
 		} else {
-			const updatedData = await emailData.updateData(unpublishedData);
-			res.status(201).json({ message: response, data: updatedData });
+			// const updatedData = await emailData.updateData(unpublishedData);
+			res.status(201).json({ message: response, data });
 		}
 	});
 });
