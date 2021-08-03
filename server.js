@@ -11,20 +11,24 @@ app.get('/', (req, res) => {
 });
 
 app.get('/sendEmail', async (req, res) => {
-	let data, receivers;
+	let receivedData;
 	try {
-		[ data, receivers ] = await additionalData.generateEmailData();
+		receivedData = await additionalData.generateEmailData();
 	} catch (error) {
 		res.status(500).json({ error: "Failed collect data" });
 		return;
 	}
-	console.log(receivers);
-	emailSender.sendEmail(receivers, (error, response) => {
+
+	// Todo: use receivedData.formattedData
+	// Structure am HTML for email body
+	// Attach the HTML to the email body 
+
+	emailSender.sendEmail(receivedData.receivers, (error, response) => {
 		if (error) {
 			res.status(500).json({ error: "Failed to send email" });
 		} else {
 			// const updatedData = await emailData.updateData(unpublishedData);
-			res.status(201).json({ message: response, data });
+			res.status(200).json({ message: response, data: receivedData.formattedData });
 		}
 	});
 });

@@ -31,21 +31,19 @@ exports.generateEmailData = async function () {
     try {
         const unpublishedData = await axios.get("/placed-order", {
             headers: {
-                // "X-Unpublished": "1",
+                "X-Unpublished": "1",
             },
             params: {
-                // $filter: "data/IsEmailSent/iv eq false",
+                $filter: "data/IsEmailSent/iv eq false",
             },
         });
         data = unpublishedData.data.items;
-        console.log(data.length);
     } catch (err) {
         console.log("Error to get the place order data");
         data = [];
     }
 
     const getVehicleData = (id) => {
-        console.log(id);
         return axios.get(`/vehicle/${id}`);
     };
 
@@ -54,7 +52,7 @@ exports.generateEmailData = async function () {
         return proms;
     };
 
-    const formatVehicle = async (item) => {
+    const formatVehicle = (item) => {
         if (item) return item.data.data.name.iv;
         return "No vehicle";
     };
@@ -108,45 +106,9 @@ exports.generateEmailData = async function () {
     let receivers = await axios.get("/accessories-location-email");
     receivers = receivers.data.items.map((receiver) => receiver.data.Email.iv);
 
-    getFormattedData().then((formattedData) => {
-        const workbook = new ExcelJS.Workbook();
+    const formattedData = await getFormattedData();
 
-        workbook.creator = "Abdullah Al Jubaer";
-
-        workbook.calcProperties.fullCalcOnLoad = true;
-
-        workbook.views = [
-            {
-                x: 0,
-                y: 0,
-                width: 10000,
-                height: 20000,
-                firstSheet: 0,
-                activeTab: 1,
-                visibility: "visible",
-            },
-        ];
-
-        const sheet = workbook.addWorksheet("Customer Data");
-        let start = 1;
-
-        formattedData.forEach((item, index) => {
-            sheet.addRows([
-                [index + 1, "Name", item.name],
-                [index + 1, "Location", item.location],
-                [index + 1, "Email", item.email],
-                [index + 1, "Vehicle", item.vehicle],
-                [index + 1, "Items", ...item.items],
-            ]);
-            sheet.mergeCells(`A${start}:A${start + 4}`);
-            start = start + 5;
-        });
-
-        workbook.xlsx.writeFile("OrderData.xlsx").then(() => {
-            console.log("File Created");
-        });
-    });
-    return { data, receivers };
+    return { rawData: data, formattedData, receivers };
 };
 
 exports.updateData = async (data) => {

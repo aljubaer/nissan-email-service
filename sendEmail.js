@@ -20,6 +20,7 @@ exports.sendEmail = function (receivers, cb) {
 				path: __dirname + '/OrderData.xlsx',
 			},
 		],
+		// Todo: use new HTML formatted data as body
 	};
 	transporter.sendMail(mailOptions, function (error, info) {
 		if (error) {
