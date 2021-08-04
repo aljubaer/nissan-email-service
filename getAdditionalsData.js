@@ -142,7 +142,7 @@ exports.updateData = async (data) => {
             );
             return { status: "success", updatedData };
         } catch (error) {
-            console.log("error");
+            console.log("Error on updating data!");
             return { status: "failed", error };
         }
     });
