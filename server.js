@@ -11,11 +11,12 @@ app.get('/', (req, res) => {
 });
 
 app.post('/sendEmail', async (req, res) => {
+	res.sendStatus(200);
 	let receivedData;
 	try {
 		receivedData = await additionalData.generateEmailData();
 	} catch (error) {
-		res.status(500).json({ error: 'Failed collect data' });
+		// res.status(500).json({ error: 'Failed collect data' });
 		return;
 	}
 
@@ -24,12 +25,10 @@ app.post('/sendEmail', async (req, res) => {
 		receivedData.formattedData,
 		(error, response) => {
 			if (error) {
-				res.status(500).json({ error: 'Failed to send email' });
+				// res.status(500).json({ error: 'Failed to send email' });
 			} else {
-				additionalData.updateData(receivedData.rawData).then(() => {
-					res
-						.status(200)
-						.json({ message: response, data: receivedData.formattedData });
+					additionalData.updateData(receivedData.rawData).then(() => {
+					// res.status(200).json({ message: response, data: receivedData.formattedData });
 				}).catch((error) => {
 					console.log("Error on updating data");
 				})
