@@ -26,10 +26,13 @@ app.get('/sendEmail', async (req, res) => {
 			if (error) {
 				res.status(500).json({ error: 'Failed to send email' });
 			} else {
-				await emailData.updateData(receivedData.rawData);
-				res
-					.status(200)
-					.json({ message: response, data: receivedData.formattedData });
+				additionalData.updateData(receivedData.rawData).then(() => {
+					res
+						.status(200)
+						.json({ message: response, data: receivedData.formattedData });
+				}).catch((error) => {
+					console.log("Error on updating data");
+				})
 			}
 		}
 	);

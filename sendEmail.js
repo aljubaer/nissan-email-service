@@ -45,7 +45,6 @@ exports.sendEmail = function (receivers, data, cb) {
 		})}
 	</table>
 	`;
-	console.log(data);
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -66,7 +65,7 @@ exports.sendEmail = function (receivers, data, cb) {
 			console.log(error.message);
 			cb(error, null);
 		} else {
-			console.log('mail sent');
+			console.log('Email sent', new Date());
 			cb(null, info.response);
 		}
 	});

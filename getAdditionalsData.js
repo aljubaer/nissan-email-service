@@ -1,4 +1,3 @@
-const ExcelJS = require("exceljs");
 const axios = require("axios");
 if (process.env.NODE_ENV === "development") {
     require("dotenv").config();
@@ -107,6 +106,8 @@ exports.generateEmailData = async function () {
     receivers = receivers.data.items.map((receiver) => receiver.data.Email.iv);
 
     const formattedData = await getFormattedData();
+
+    console.log('Number item fetched ', data.length, new Date());
 
     return { rawData: data, formattedData, receivers };
 };
