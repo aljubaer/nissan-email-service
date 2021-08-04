@@ -1,8 +1,8 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 exports.sendEmail = function (receivers, data, cb) {
-	let outPut = `
+    let outPut = `
 	<h1>New Order</h1>
 	<table style="border-collapse: collapse;">
 		<tr>
@@ -15,58 +15,60 @@ exports.sendEmail = function (receivers, data, cb) {
 			<th style="border: 1px solid #dddddd;text-align: left; padding: 8px; ">Items</th>
 		</tr>
 		${data.map((item, index) => {
-			console.log(item);
-			return `
+            console.log(item);
+            return `
 			<tr>
-			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px;  border-collapse: collapse;">${index}</td>
+			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px;  border-collapse: collapse;">${
+                index + 1
+            }</td>
 			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px; border-collapse: collapse;">${
-				item.name
-			}</td>
+                item.name
+            }</td>
 			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px; border-collapse: collapse;">${
-				item.location
-			}</td>
+                item.location
+            }</td>
 			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px; border-collapse: collapse;">${
-				item.email
-			}</td>
+                item.email
+            }</td>
 			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px; border-collapse: collapse;">${
-				item.phone
-			}</td>
+                item.phone
+            }</td>
 			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px; border-collapse: collapse;">${
-				item.vehicle
-			}</td>
+                item.vehicle
+            }</td>
 			<td style="border: 1px solid #dddddd;text-align: left; padding: 8px; border-collapse: collapse;">
 				${item.items.map((i) => {
-					return `
-						${i},`;
-				})}
+                    return `
+						${i}`;
+                })}
 			</td>
 		</tr>
 			`;
-		})}
+        })}
 	</table>
 	`;
-	const transporter = nodemailer.createTransport({
-		service: 'gmail',
-		auth: {
-			user: process.env.email_user,
-			pass: process.env.email_password,
-		},
-	});
-	const mailOptions = {
-		from: '"Sales" <leocollab01@gmail.com>',
-		to: receivers.join(),
-		// to: 'jubaer.bs23@gmail.com',
-		subject: "NISSAN Driver's Guide NMEF - New Accessories Order!!!",
-		text: 'There are some new orders from website.',
-		html: outPut,
-	};
-	transporter.sendMail(mailOptions, function (error, info) {
-		if (error) {
-			console.log(error.message);
-			cb(error, null);
-		} else {
-			console.log('Email sent', new Date());
-			cb(null, info.response);
-		}
-	});
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.email_user,
+            pass: process.env.email_password,
+        },
+    });
+    const mailOptions = {
+        from: '"Sales" <leocollab01@gmail.com>',
+        to: receivers.join(),
+        // to: 'jubaer.bs23@gmail.com',
+        subject: "NISSAN Driver's Guide NMEF - New Accessories Order!!!",
+        text: "There are some new orders from website.",
+        html: outPut,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error.message);
+            cb(error, null);
+        } else {
+            console.log("Email sent", new Date());
+            cb(null, info.response);
+        }
+    });
 };
