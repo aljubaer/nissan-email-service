@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const emailData = require('./createExcel');
+const additionalData = require('./getAdditionalsData');
 const emailSender = require('./sendEmail');
 
 const PORT = process.env.PORT || 3000;
@@ -11,15 +11,32 @@ app.get('/', (req, res) => {
 });
 
 app.get('/sendEmail', async (req, res) => {
-	const { data: unpublishedData, receivers } = await emailData.generateEmailData();
-	emailSender.sendEmail(receivers, async (error, response) => {
-		if (error) {
-			res.status(500).json({ ...error });
-		} else {
-			const updatedData = await emailData.updateData(unpublishedData);
-			res.status(201).json({ message: response, data: updatedData });
+	let receivedData;
+	try {
+		receivedData = await additionalData.generateEmailData();
+	} catch (error) {
+		res.status(500).json({ error: 'Failed collect data' });
+		return;
+	}
+
+	// Todo: use receivedData.formattedData
+	// Structure am HTML for email body
+	// Attach the HTML to the email body
+	// emailSender.sendMail(receivedData.receivers, receivedData.formattedData);
+	emailSender.sendEmail(
+		receivedData.receivers,
+		receivedData.formattedData,
+		(error, response) => {
+			if (error) {
+				res.status(500).json({ error: 'Failed to send email' });
+			} else {
+				// const updatedData = await emailData.updateData(unpublishedData);
+				res
+					.status(200)
+					.json({ message: response, data: receivedData.formattedData });
+			}
 		}
-	});
+	);
 });
 
 app.listen(PORT, () => {

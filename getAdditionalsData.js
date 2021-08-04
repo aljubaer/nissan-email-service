@@ -39,7 +39,8 @@ exports.generateEmailData = async function () {
         });
         data = unpublishedData.data.items;
     } catch (err) {
-        console.log(err);
+        console.log("Error to get the place order data");
+        data = [];
     }
 
     const getVehicleData = (id) => {
@@ -51,69 +52,63 @@ exports.generateEmailData = async function () {
         return proms;
     };
 
-    const formatItems = async (items) =>
-        items.map((item) => item.data.data.Name.en);
+    const formatVehicle = (item) => {
+        if (item) return item.data.data.name.iv;
+        return "No vehicle";
+    };
+
+    const formatItems = async (items) => items.map((item) => item.data.data.Name.en);
 
     const getFormattedData = async () => {
         let _data = await data.map(async (item) => {
-            let extras = await Promise.all([
-                getVehicleData(item.data.Vehicle.iv),
-                getItemsData(item.data.Items.iv),
-            ]);
-            return {
-                name: item.data.Name.iv,
-                location: item.data.LocationName.iv,
-                email: item.data.ContactEmail.iv,
-                phone: item.data.ContactNumber.iv,
-                vehicle: extras[0].data.data.name.iv,
-                items: await formatItems(await Promise.all(extras[1])),
-            };
+            if (item) {
+                let vehicleDetails, accessoriesDetails, formattedAccessories;
+                try {
+                    vehicleDetails = await getVehicleData(item.data.Vehicle.iv);
+                } catch (error) {
+                    console.log("Error on getting vehicle data");
+                }
+                try {
+                    accessoriesDetails = await getItemsData(item.data.Items.iv);
+                } catch (error) {
+                    console.log("Error on getting accessories data");
+                }
+                try {
+                    formattedAccessories = await formatItems(
+                        await Promise.all(accessoriesDetails)
+                    )
+                } catch (error) {
+                    console.log('Error on formatting accessories');
+                    formattedAccessories = [];
+                }
+                return {
+                    name: item.data.Name.iv,
+                    location: item.data.LocationName.iv,
+                    email: item.data.ContactEmail.iv,
+                    phone: item.data.ContactNumber.iv,
+                    vehicle: formatVehicle(vehicleDetails),
+                    items: formattedAccessories,
+                };
+            } else {
+                return {
+                    name: '',
+                    location: '',
+                    email: '',
+                    phone: '',
+                    vehicle: '',
+                    items: [],
+                };
+            }
         });
         return await Promise.all(_data);
     };
 
-    let receivers = await axios.get('/accessories-location-email');
-    receivers = receivers.data.items.map(receiver => receiver.data.Email.iv);
+    let receivers = await axios.get("/accessories-location-email");
+    receivers = receivers.data.items.map((receiver) => receiver.data.Email.iv);
 
-    getFormattedData().then((formattedData) => {
-        const workbook = new ExcelJS.Workbook();
+    const formattedData = await getFormattedData();
 
-        workbook.creator = "Abdullah Al Jubaer";
-
-        workbook.calcProperties.fullCalcOnLoad = true;
-
-        workbook.views = [
-            {
-                x: 0,
-                y: 0,
-                width: 10000,
-                height: 20000,
-                firstSheet: 0,
-                activeTab: 1,
-                visibility: "visible",
-            },
-        ];
-
-        const sheet = workbook.addWorksheet("Customer Data");
-        let start = 1;
-
-        formattedData.forEach((item, index) => {
-            sheet.addRows([
-                [index + 1, "Name", item.name],
-                [index + 1, "Location", item.location],
-                [index + 1, "Email", item.email],
-                [index + 1, "Vehicle", item.vehicle],
-                [index + 1, "Items", ...item.items],
-            ]);
-            sheet.mergeCells(`A${start}:A${start + 4}`);
-            start = start + 5;
-        });
-
-        workbook.xlsx.writeFile("OrderData.xlsx").then(() => {
-            console.log("File Created");
-        });
-    });
-    return { data, receivers};
+    return { rawData: data, formattedData, receivers };
 };
 
 exports.updateData = async (data) => {
@@ -147,7 +142,7 @@ exports.updateData = async (data) => {
             );
             return { status: "success", updatedData };
         } catch (error) {
-            console.log('error');
+            console.log("error");
             return { status: "failed", error };
         }
     });
