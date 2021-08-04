@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
 	res.sendStatus(200);
 });
 
-app.get('/sendEmail', async (req, res) => {
+app.post('/sendEmail', async (req, res) => {
 	let receivedData;
 	try {
 		receivedData = await additionalData.generateEmailData();
